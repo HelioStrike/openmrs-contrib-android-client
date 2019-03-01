@@ -89,38 +89,36 @@ public class ResourceSerializerTest {
     private Patient generatePatient(boolean withPersonUuid) {
         Patient patient = new Patient();
         if (withPersonUuid) {
-            patient.setPerson(generatePersonWithUuid());
+            setPatientWithUuid(patient);
         } else {
-            patient.setPerson(generatePersonWithoutUuid());
+            setPatientWithoutUuid(patient);
         }
         patient.setVoided(false);
         patient.setIdentifiers(Arrays.asList(generateIdentifier()));
         return patient;
     }
 
-    private Person generatePersonWithoutUuid() {
-        Person person = new Person();
-        person.setBirthdate(DateUtils.convertTime(System.currentTimeMillis()));
+    private void setPatientWithoutUuid(Patient patient) {
+        Patient person = new Patient();
+        patient.setBirthdate(DateUtils.convertTime(System.currentTimeMillis()));
         PersonName  personName = new PersonName();
         personName.setFamilyName("family");
         personName.setGivenName("given");
         personName.setMiddleName("middle");
-        person.setNames(Arrays.asList(personName));
-        person.setGender("M");
-        return person;
+        patient.setNames(Arrays.asList(personName));
+        patient.setGender("M");
     }
 
-    private Person generatePersonWithUuid() {
-        Person person = new Person();
-        person.setBirthdate(DateUtils.convertTime(System.currentTimeMillis()));
+    private void setPatientWithUuid(Patient patient) {
+        Patient person = new Patient();
+        patient.setBirthdate(DateUtils.convertTime(System.currentTimeMillis()));
         PersonName  personName = new PersonName();
         personName.setFamilyName("family");
         personName.setGivenName("given");
         personName.setMiddleName("middle");
-        person.setNames(Arrays.asList(personName));
-        person.setGender("M");
-        person.setUuid("PersonUUID");
-        return person;
+        patient.setNames(Arrays.asList(personName));
+        patient.setGender("M");
+        patient.setUuid("PersonUUID");
     }
 
     private PatientIdentifier generateIdentifier() {

@@ -92,7 +92,7 @@ public abstract class ACUnitTestBase {
         Patient patient = new Patient();
         patient.setId(id);
         patient.setUuid("patient_one_uuid"+id);
-        patient.setPerson(createPerson(id));
+        setPerson(patient, id);
         patient.setIdentifiers(Collections.singletonList(createIdentifier(id)));
         return patient;
     }
@@ -103,13 +103,12 @@ public abstract class ACUnitTestBase {
         return identifier;
     }
 
-    protected Person createPerson(Long id) {
-        Person person = new Person();
-        person.setNames(Collections.singletonList(createPersonName(id)));
-        person.setAddresses(Collections.singletonList(createPersonAddress(id)));
-        person.setGender("M");
-        person.setBirthdate("25-02-2016");
-        return person;
+    protected Person setPerson(Patient patient, Long id) {
+        patient.setNames(Collections.singletonList(createPersonName(id)));
+        patient.setAddresses(Collections.singletonList(createPersonAddress(id)));
+        patient.setGender("M");
+        patient.setBirthdate("25-02-2016");
+        return patient;
     }
 
     protected PersonAddress createPersonAddress(Long id) {

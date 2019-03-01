@@ -79,7 +79,6 @@ public class PatientDAO {
 
     private Patient cursorToPatient(Cursor cursor) {
         Patient patient = new Patient();
-        Person person = new Person();
 
         patient.setId(cursor.getLong(cursor.getColumnIndex(PatientTable.Column.ID)));
         patient.setDisplay(cursor.getString(cursor.getColumnIndex(PatientTable.Column.DISPLAY)));
@@ -95,16 +94,15 @@ public class PatientDAO {
         personName.setGivenName(cursor.getString(cursor.getColumnIndex(PatientTable.Column.GIVEN_NAME)));
         personName.setMiddleName(cursor.getString(cursor.getColumnIndex(PatientTable.Column.MIDDLE_NAME)));
         personName.setFamilyName(cursor.getString(cursor.getColumnIndex(PatientTable.Column.FAMILY_NAME)));
-        person.getNames().add(personName);
+        patient.getNames().add(personName);
 
-        person.setGender(cursor.getString(cursor.getColumnIndex(PatientTable.Column.GENDER)));
-        person.setBirthdate(cursor.getString(cursor.getColumnIndex(PatientTable.Column.BIRTH_DATE)));
+        patient.setGender(cursor.getString(cursor.getColumnIndex(PatientTable.Column.GENDER)));
+        patient.setBirthdate(cursor.getString(cursor.getColumnIndex(PatientTable.Column.BIRTH_DATE)));
         byte[] photoByteArray = cursor.getBlob(cursor.getColumnIndex(PatientTable.Column.PHOTO));
         if (photoByteArray != null)
-            person.setPhoto(byteArrayToBitmap(photoByteArray));
-        person.getAddresses().add(cursorToAddress(cursor));
+            patient.setPhoto(byteArrayToBitmap(photoByteArray));
+        patient.getAddresses().add(cursorToAddress(cursor));
 
-        patient.setPerson(person);
         return patient;
     }
 

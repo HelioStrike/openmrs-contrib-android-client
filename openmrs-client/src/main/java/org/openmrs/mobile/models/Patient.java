@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Patient extends Resource implements Serializable{
+public class Patient extends Person implements Serializable{
 
     private Long id;
     private String encounters = "";
@@ -29,10 +29,6 @@ public class Patient extends Resource implements Serializable{
     @SerializedName("identifiers")
     @Expose
     private List<PatientIdentifier> identifiers = new ArrayList<PatientIdentifier>();
-
-    @SerializedName("person")
-    @Expose
-    private Person person;
 
     @SerializedName("voided")
     @Expose
@@ -81,8 +77,10 @@ public class Patient extends Resource implements Serializable{
      * @return
      *     The person
      */
+
+    
     public Person getPerson() {
-        return person;
+        return this;
     }
 
     /**
@@ -90,9 +88,12 @@ public class Patient extends Resource implements Serializable{
      * @param person
      *     The person
      */
+
+    /*
     public void setPerson(Person person) {
         this.person = person;
     }
+    */
 
     /**
      * 
@@ -152,17 +153,17 @@ public class Patient extends Resource implements Serializable{
 
     public Map<String, String> toMap(){
         Map<String, String> map = new HashMap<>();
-        puToMapIfNotNull(map, "givenname", person.getName().getGivenName());
-        puToMapIfNotNull(map, "middlename",person.getName().getMiddleName());
-        puToMapIfNotNull(map, "familyname", person.getName().getFamilyName());
-        puToMapIfNotNull(map, "gender", person.getGender());
-        puToMapIfNotNull(map, "birthdate", person.getBirthdate());
-        puToMapIfNotNull(map, "address1", person.getAddress().getAddress1());
-        puToMapIfNotNull(map, "address2", person.getAddress().getAddress2());
-        puToMapIfNotNull(map, "city", person.getAddress().getCityVillage());
-        puToMapIfNotNull(map, "state", person.getAddress().getStateProvince());
-        puToMapIfNotNull(map, "postalcode", person.getAddress().getPostalCode());
-        puToMapIfNotNull(map, "country", person.getAddress().getCountry());
+        puToMapIfNotNull(map, "givenname", this.getName().getGivenName());
+        puToMapIfNotNull(map, "middlename",this.getName().getMiddleName());
+        puToMapIfNotNull(map, "familyname", this.getName().getFamilyName());
+        puToMapIfNotNull(map, "gender", this.getGender());
+        puToMapIfNotNull(map, "birthdate", this.getBirthdate());
+        puToMapIfNotNull(map, "address1", this.getAddress().getAddress1());
+        puToMapIfNotNull(map, "address2", this.getAddress().getAddress2());
+        puToMapIfNotNull(map, "city", this.getAddress().getCityVillage());
+        puToMapIfNotNull(map, "state", this.getAddress().getStateProvince());
+        puToMapIfNotNull(map, "postalcode", this.getAddress().getPostalCode());
+        puToMapIfNotNull(map, "country", this.getAddress().getCountry());
         return map;
     }
 

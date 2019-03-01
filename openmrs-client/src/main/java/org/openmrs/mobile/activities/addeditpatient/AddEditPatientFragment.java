@@ -369,15 +369,157 @@ public class AddEditPatientFragment extends ACBaseFragment<AddEditPatientContrac
         return person;
     }
 
+    private void setPatientDetails(Patient patient) {
+
+        String emptyError = getString(R.string.emptyerror);
+
+        // Validate address
+        if (ViewUtils.isEmpty(edaddr1)
+                && ViewUtils.isEmpty(edaddr2)
+                && ViewUtils.isEmpty(edcity)
+                && ViewUtils.isEmpty(edpostal)
+                && ViewUtils.isEmpty(edcountry)
+                && ViewUtils.isEmpty(edstate)) {
+
+            addrerror.setText(R.string.atleastone);
+        } else if (!ViewUtils.validateText(ViewUtils.getInput(edaddr1), ViewUtils.ILLEGAL_ADDRESS_CHARACTERS)
+                || !ViewUtils.validateText(ViewUtils.getInput(edaddr2), ViewUtils.ILLEGAL_ADDRESS_CHARACTERS)) {
+
+            addrerror.setText(getString(R.string.addr_invalid_error));
+        }
+
+        // Add address
+        PersonAddress address = new PersonAddress();
+        address.setAddress1(ViewUtils.getInput(edaddr1));
+        address.setAddress2(ViewUtils.getInput(edaddr2));
+        address.setCityVillage(ViewUtils.getInput(edcity));
+        address.setPostalCode(ViewUtils.getInput(edpostal));
+        address.setCountry(ViewUtils.getInput(edcountry));
+        address.setStateProvince(ViewUtils.getInput(edstate));
+        address.setPreferred(true);
+
+        List<PersonAddress> addresses = new ArrayList<>();
+        addresses.add(address);
+        patient.setAddresses(addresses);
+
+        // Validate names
+        String givenNameEmpty = getString(R.string.fname_empty_error);
+        // Invalid characters for both the given name and middle name
+        String givenAndMiddleNameError = getString(R.string.fmname_invalid_error);
+        // Invalid characters for given name only
+        String givenNameError = getString(R.string.fname_invalid_error);
+        // Invalid characters for the middle name
+        String middleNameError = getString(R.string.midname_invalid_error);
+        // Given name empty and invalid characters for the middle name
+        String givenEmptyMiddleNameError = givenNameEmpty + '\n' + middleNameError;
+        // Invalid family name
+        String familyNameError = getString(R.string.lname_invalid_error);
+
+        // Given and middle name validation
+        if (!ViewUtils.isEmpty(edfname) && !ViewUtils.isEmpty(edmname)) {
+
+            if (!ViewUtils.validateText(ViewUtils.getInput(edfname), ViewUtils.ILLEGAL_CHARACTERS)
+                    && !ViewUtils.validateText(ViewUtils.getInput(edmname), ViewUtils.ILLEGAL_CHARACTERS)) {
+                // Both given and middle name are invalid
+                fnameerror.setText(givenAndMiddleNameError);
+            } else if (!ViewUtils.validateText(ViewUtils.getInput(edfname), ViewUtils.ILLEGAL_CHARACTERS)) {
+                // Only given name is invalid
+                fnameerror.setText(givenNameError);
+            } else if (!ViewUtils.validateText(ViewUtils.getInput(edmname), ViewUtils.ILLEGAL_CHARACTERS)) {
+                // Only middle name is invalid
+                fnameerror.setText(middleNameError);
+            }
+        } else if (ViewUtils.isEmpty(edfname)) {
+            // Given name is empty
+            if (!ViewUtils.validateText(ViewUtils.getInput(edmname), ViewUtils.ILLEGAL_CHARACTERS)) {
+                // Given name empty, middle name invalid
+                fnameerror.setText(givenEmptyMiddleNameError);
+            } else {
+                fnameerror.setText(givenNameEmpty);
+            }
+        } else if (ViewUtils.isEmpty(edmname)) {
+            // Middle name is empty
+            if (!ViewUtils.validateText(ViewUtils.getInput(edfname), ViewUtils.ILLEGAL_CHARACTERS)) {
+                // Given name invalid
+                fnameerror.setText(givenNameError);
+            }
+        } else {
+            // Both given and middle name is invalid
+            fnameerror.setText(givenNameEmpty);
+        }
+
+        // Family name validation
+        if (ViewUtils.isEmpty(edlname)) {
+            lnameerror.setText(emptyError);
+        } else if (!ViewUtils.validateText(ViewUtils.getInput(edlname), ViewUtils.ILLEGAL_CHARACTERS)) {
+            lnameerror.setText(familyNameError);
+        }
+
+        // Add names
+        PersonName name = new PersonName();
+        name.setFamilyName(ViewUtils.getInput(edlname));
+        name.setGivenName(ViewUtils.getInput(edfname));
+        name.setMiddleName(ViewUtils.getInput(edmname));
+
+        List<PersonName> names = new ArrayList<>();
+        names.add(name);
+        patient.setNames(names);
+
+        // Add gender
+        String[] genderChoices = {"M","F"};
+        int index = gen.indexOfChild(getActivity().findViewById(gen.getCheckedRadioButtonId()));
+        if (index != -1) {
+            patient.setGender(genderChoices[index]);
+        } else {
+            patient.setGender(null);
+        }
+
+        // Add birthdate
+        String birthdate = null;
+        if(ViewUtils.isEmpty(eddob)) {
+            if (!StringUtils.isBlank(ViewUtils.getInput(edyr)) || !StringUtils.isBlank(ViewUtils.getInput(edmonth))) {
+                dateTimeFormatter = DateTimeFormat.forPattern(DateUtils.OPEN_MRS_REQUEST_PATIENT_FORMAT);
+
+                int yeardiff = ViewUtils.isEmpty(edyr)? 0 : Integer.parseInt(edyr.getText().toString());
+                int mondiff = ViewUtils.isEmpty(edmonth)? 0 : Integer.parseInt(edmonth.getText().toString());
+                LocalDate now = new LocalDate();
+                bdt = now.toDateTimeAtStartOfDay().toDateTime();
+                bdt = bdt.minusYears(yeardiff);
+                bdt = bdt.minusMonths(mondiff);
+                patient.setBirthdateEstimated(true);
+                birthdate = dateTimeFormatter.print(bdt);
+            }
+        }
+        else {
+            String unvalidatedDate = eddob.getText().toString().trim();
+
+            DateTime minDateOfBirth = DateTime.now().minusYears(
+                    ApplicationConstants.RegisterPatientRequirements.MAX_PATIENT_AGE);
+            DateTime maxDateOfBirth = DateTime.now();
+
+            if (DateUtils.validateDate(unvalidatedDate, minDateOfBirth, maxDateOfBirth)) {
+                dateTimeFormatter = DateTimeFormat.forPattern(DateUtils.DEFAULT_DATE_FORMAT);
+                bdt = dateTimeFormatter.parseDateTime(unvalidatedDate);
+
+                dateTimeFormatter = DateTimeFormat.forPattern(DateUtils.OPEN_MRS_REQUEST_PATIENT_FORMAT);
+                birthdate = dateTimeFormatter.print(bdt);
+            }
+        }
+        patient.setBirthdate(birthdate);
+
+        if (patientPhoto != null)
+            patient.setPhoto(patientPhoto);
+    }
+
     private Patient createPatient() {
         final Patient patient = new Patient();
-        patient.setPerson(createPerson());
+        setPatientDetails(patient);
         patient.setUuid(" ");
         return patient;
     }
 
     private Patient updatePatient(Patient patient) {
-        patient.setPerson(createPerson());
+        setPatientDetails(patient);
         return patient;
     }
 
